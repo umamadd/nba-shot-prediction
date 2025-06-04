@@ -15,33 +15,27 @@ from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
 
 # --- 1. Load & clean ---
-df = pd.read_csv("shot_logs.csv").dropna(
-    subset=["SHOT_RESULT", "SHOT_CLOCK", "SHOT_DIST", "CLOSE_DEF_DIST"]
-)
+df = pd.read_csv("shot_logs.csv").dropna(subset=["SHOT_RESULT", "SHOT_CLOCK", "SHOT_DIST", "CLOSE_DEF_DIST"])
 
 # --- 2. Feature engineering ---
 def zone(dist):
-    return pd.cut(dist, bins=[-1, 4, 10, 22, np.inf],
-                  labels=["Paint","Mid-Range","Long 2","3PT"])
+    return pd.cut(dist, bins=[-1, 4, 10, 22, np.inf],labels=["Paint","Mid-Range","Long 2","3PT"])
 
 def defense(dist):
-    return pd.cut(dist, bins=[-1,2,4,np.inf],
-                  labels=["Tight","Moderate","Open"])
+    return pd.cut(dist, bins=[-1,2,4,np.inf],labels=["Tight","Moderate","Open"])
 
 def clock_phase(clock):
-    return pd.cut(clock, bins=[0,7,14,np.inf],
-                  labels=["Late","Mid","Early"])
+    return pd.cut(clock, bins=[0,7,14,np.inf],labels=["Late","Mid","Early"])
 
-df["SHOT_ZONE"]       = zone(df["SHOT_DIST"])
-df["DEFENSE"]         = defense(df["CLOSE_DEF_DIST"])
+df["SHOT_ZONE"]= zone(df["SHOT_DIST"])
+df["DEFENSE"]= defense(df["CLOSE_DEF_DIST"])
 df["SHOT_CLOCK_PHASE"]= clock_phase(df["SHOT_CLOCK"])
-df["TARGET"]          = (df["SHOT_RESULT"]=="made").astype(int)
+df["TARGET"]= (df["SHOT_RESULT"]=="made").astype(int)
 
 
 
 # --- 3. Train/test split ---
-X = df[["SHOT_DIST","SHOT_CLOCK","CLOSE_DEF_DIST",
-        "SHOT_ZONE","DEFENSE","SHOT_CLOCK_PHASE"]]
+X = df[["SHOT_DIST","SHOT_CLOCK","CLOSE_DEF_DIST","SHOT_ZONE","DEFENSE","SHOT_CLOCK_PHASE"]]
 y = df["TARGET"]
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
